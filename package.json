@@ -1,0 +1,13 @@
+{
+    "name": "online-learning-system",
+    "version": "1.0.0",
+    "description": "Online Learning Management System",
+    "scripts": {
+        "install:backend": "cd backend && npm install",
+        "build": "cd backend && npm install",
+        "start": "cd backend && node server.js"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}
