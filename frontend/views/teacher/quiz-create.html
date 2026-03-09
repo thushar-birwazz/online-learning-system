@@ -1,0 +1,128 @@
+<!-- Teacher Quiz Create/Manage -->
+<div class="page-container" ng-controller="TeacherQuizController">
+    <div class="page-hero">
+        <div class="hero-content">
+            <h1><i class="fas fa-question-circle me-2"></i>Quiz Management</h1>
+            <p>Create MCQ quizzes with timers, set marks, and track student performance</p>
+        </div>
+        <button class="btn btn-light btn-hero" ng-click="openAddForm()">
+            <i class="fas fa-plus me-2"></i>Create Quiz
+        </button>
+    </div>
+
+    <div class="alert alert-success" ng-if="message">{{message}}</div>
+    <div class="alert alert-danger" ng-if="errorMsg">{{errorMsg}}</div>
+
+    <!-- Quiz Form -->
+    <div class="form-card" ng-if="showForm">
+        <h3><i class="fas fa-file-alt me-2"></i>{{editMode ? 'Edit Quiz' : 'Create New Quiz'}}</h3>
+        <form ng-submit="saveQuiz()">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Quiz Title *</label>
+                        <input type="text" class="form-control" ng-model="formData.title" required
+                            placeholder="e.g. Chapter 1 Test">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Select Course *</label>
+                        <select class="form-control" ng-model="formData.courseId" required>
+                            <option value="">-- Choose Course --</option>
+                            <option ng-repeat="c in courses" value="{{c._id}}">{{c.title}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label><i class="fas fa-clock me-1"></i>Timer (mins) *</label>
+                        <input type="number" class="form-control" ng-model="formData.timer" min="1" required>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label>Passing Marks</label>
+                        <input type="number" class="form-control" ng-model="formData.passingMarks" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Questions Section -->
+            <div class="questions-section mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4><i class="fas fa-list me-2"></i>Questions ({{formData.questions.length}})</h4>
+                    <button type="button" class="btn btn-sm btn-outline-primary" ng-click="addQuestion()">
+                        <i class="fas fa-plus me-1"></i>Add Question
+                    </button>
+                </div>
+
+                <div class="question-card" ng-repeat="q in formData.questions">
+                    <div class="question-header">
+                        <span class="question-num">Q{{$index + 1}}</span>
+                        <button type="button" class="btn btn-xs btn-outline-danger ms-auto"
+                            ng-click="removeQuestion($index)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" ng-model="q.text"
+                            placeholder="Enter your question here..." required>
+                    </div>
+                    <div class="options-grid mt-2">
+                        <div class="option-row" ng-repeat="opt in q.options track by $index"
+                            ng-class="{correct: q.correctAnswer == $index}">
+                            <label class="option-label">
+                                <input type="radio" ng-model="q.correctAnswer" ng-value="$index"
+                                    name="correct_{{$parent.$index}}">
+                                <span class="option-letter">{{['A','B','C','D'][$index]}}</span>
+                            </label>
+                            <input type="text" class="form-control option-input" ng-model="q.options[$index]"
+                                placeholder="Option {{['A','B','C','D'][$index]}}" required>
+                        </div>
+                    </div>
+                    <div class="form-group mt-2 d-flex align-items-center gap-2">
+                        <label class="mb-0 text-muted small">Marks:</label>
+                        <input type="number" class="form-control marks-input" ng-model="q.marks" min="1" required>
+                        <span class="text-muted small">(Select correct answer with radio button)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary-grad">
+                    <i class="fas fa-save me-2"></i>{{editMode ? 'Update Quiz' : 'Publish Quiz'}}
+                </button>
+                <button type="button" class="btn btn-secondary" ng-click="cancelForm()">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Quiz List -->
+    <div class="section mt-4">
+        <h2 class="section-title">Published Quizzes</h2>
+        <div ng-if="!quizzes.length" class="empty-state">
+            <i class="fas fa-question-circle fa-3x mb-3"></i>
+            <p>No quizzes yet. Click "Create Quiz" to get started.</p>
+        </div>
+        <div class="quiz-card" ng-repeat="quiz in quizzes">
+            <div class="quiz-card-left">
+                <div class="quiz-icon"><i class="fas fa-file-alt"></i></div>
+                <div class="quiz-info">
+                    <h4>{{quiz.title}}</h4>
+                    <p><i class="fas fa-book me-1"></i>{{getCourseName(quiz)}} &nbsp;|&nbsp;
+                        <i class="fas fa-clock me-1"></i>{{quiz.timer}} mins &nbsp;|&nbsp;
+                        <i class="fas fa-star me-1"></i>{{quiz.totalMarks}} marks &nbsp;|&nbsp;
+                        <i class="fas fa-list me-1"></i>{{quiz.questions.length}} questions
+                    </p>
+                </div>
+            </div>
+            <div class="quiz-card-actions">
+                <button class="btn btn-sm btn-outline-primary" ng-click="openEditForm(quiz)"><i
+                        class="fas fa-edit me-1"></i>Edit</button>
+                <button class="btn btn-sm btn-outline-danger ms-1" ng-click="deleteQuiz(quiz._id)"><i
+                        class="fas fa-trash me-1"></i>Delete</button>
+            </div>
+        </div>
+    </div>
+</div>

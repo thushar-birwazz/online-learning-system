@@ -1,0 +1,144 @@
+<!-- Teacher Courses -->
+<div class="page-container" ng-controller="TeacherCourseController">
+    <div class="page-hero">
+        <div class="hero-content">
+            <h1><i class="fas fa-book me-2"></i>Course Management</h1>
+            <p>Create, edit, and manage your courses — upload videos, PDFs, and assignments</p>
+        </div>
+        <button class="btn btn-light btn-hero" ng-click="openAddForm()">
+            <i class="fas fa-plus me-2"></i>New Course
+        </button>
+    </div>
+
+    <div class="alert alert-success" ng-if="message">{{message}}</div>
+    <div class="alert alert-danger" ng-if="errorMsg">{{errorMsg}}</div>
+
+    <!-- Add/Edit Form -->
+    <div class="form-card" ng-if="showForm">
+        <h3>{{editMode ? 'Edit Course' : 'Create New Course'}}</h3>
+        <form ng-submit="saveCourse()">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Course Title *</label>
+                        <input type="text" class="form-control" ng-model="formData.title" required
+                            placeholder="e.g. Introduction to Python">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Category</label>
+                        <input type="text" class="form-control" ng-model="formData.category"
+                            placeholder="e.g. Programming">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Duration</label>
+                        <input type="text" class="form-control" ng-model="formData.duration" placeholder="e.g. 4 weeks">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group mt-3">
+                <label>Description *</label>
+                <textarea class="form-control" ng-model="formData.description" rows="3"
+                    placeholder="Describe what students will learn..." required></textarea>
+            </div>
+            <div class="mt-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary-grad">
+                    <i class="fas fa-save me-2"></i>{{editMode ? 'Update' : 'Create'}} Course
+                </button>
+                <button type="button" class="btn btn-secondary" ng-click="cancelForm()">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Courses Grid -->
+    <div class="courses-grid mt-4">
+        <div ng-if="!courses.length && !showForm" class="empty-state">
+            <i class="fas fa-book-open fa-3x mb-3"></i>
+            <h4>No courses yet</h4>
+            <button class="btn btn-primary-grad" ng-click="openAddForm()">Create Your First Course</button>
+        </div>
+
+        <div class="course-card" ng-repeat="course in courses">
+            <div class="course-card-header">
+                <div class="course-icon"><i class="fas fa-play-circle"></i></div>
+                <div class="course-card-actions">
+                    <button class="btn btn-sm btn-icon" ng-click="openEditForm(course)" title="Edit"><i
+                            class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-icon text-danger" ng-click="deleteCourse(course._id)"
+                        title="Delete"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+            <h3 class="course-title">{{course.title}}</h3>
+            <p class="course-desc">{{course.description | limitTo:80}}...</p>
+            <div class="course-meta">
+                <span><i class="fas fa-tag me-1"></i>{{course.category || 'General'}}</span>
+                <span><i class="fas fa-clock me-1"></i>{{course.duration || 'N/A'}}</span>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="upload-section mt-3">
+                <!-- Videos (Multiple) -->
+                <div class="upload-block">
+                    <label class="upload-label"><i class="fas fa-video me-2 text-primary"></i>Video Lectures
+                        <span class="badge bg-primary ms-1">{{course.videos.length}}</span></label>
+                    <div ng-repeat="v in course.videos"
+                        class="uploaded-file d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-check-circle text-success me-1"></i>{{v.title}}
+                            <small class="text-muted" ng-if="v.duration">({{formatDuration(v.duration)}})</small></span>
+                        <button class="btn btn-xs btn-outline-danger" ng-click="deleteVideo(course._id, v._id)"><i
+                                class="fas fa-times"></i></button>
+                    </div>
+                    <div class="upload-input-row mt-2">
+                        <input type="file" class="form-control form-control-sm" id="videoInput_{{course._id}}"
+                            accept="video/*">
+                        <button class="btn btn-sm btn-primary" ng-click="uploadVideo(course._id)"
+                            ng-disabled="uploading">
+                            <i class="fas fa-upload me-1"></i>{{uploading ? 'Uploading...' : 'Add Video'}}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PDF Upload -->
+                <div class="upload-block mt-2">
+                    <label class="upload-label"><i class="fas fa-file-pdf me-2 text-danger"></i>PDF Files</label>
+                    <div ng-repeat="pdf in course.pdfFiles" class="uploaded-file">
+                        <i class="fas fa-file-pdf text-danger me-1"></i><span>{{pdf.name}}</span>
+                    </div>
+                    <div class="upload-input-row">
+                        <input type="file" class="form-control form-control-sm" id="pdfInput_{{course._id}}"
+                            accept=".pdf,.doc,.docx">
+                        <button class="btn btn-sm btn-danger" ng-click="uploadPdf(course._id)" ng-disabled="uploading">
+                            <i class="fas fa-upload me-1"></i>Upload PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Assignments -->
+                <div class="upload-block mt-2">
+                    <label class="upload-label"><i class="fas fa-tasks me-2 text-warning"></i>Assignments</label>
+                    <div ng-repeat="a in course.assignments" class="assignment-row">
+                        <span><i class="fas fa-clipboard me-1"></i>{{a.title}}</span>
+                        <button class="btn btn-xs btn-outline-danger" ng-click="deleteAssignment(course._id, a._id)"><i
+                                class="fas fa-times"></i></button>
+                    </div>
+                    <div ng-if="selectedCourse && selectedCourse._id === course._id" class="mt-2">
+                        <input type="text" class="form-control form-control-sm mb-1" ng-model="assignmentForm.title"
+                            placeholder="Assignment title">
+                        <textarea class="form-control form-control-sm mb-1" ng-model="assignmentForm.description"
+                            placeholder="Description (optional)" rows="2"></textarea>
+                        <button class="btn btn-sm btn-warning" ng-click="addAssignment(course._id)"><i
+                                class="fas fa-plus me-1"></i>Add</button>
+                        <button class="btn btn-sm btn-secondary ms-1" ng-click="selectedCourse = null">Cancel</button>
+                    </div>
+                    <button class="btn btn-sm btn-outline-warning mt-1"
+                        ng-if="!selectedCourse || selectedCourse._id !== course._id" ng-click="selectCourse(course)">
+                        <i class="fas fa-plus me-1"></i>Add Assignment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

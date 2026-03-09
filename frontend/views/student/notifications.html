@@ -1,0 +1,42 @@
+<!-- Student Notifications -->
+<div class="page-container" ng-controller="StudentNotificationController">
+    <div class="page-hero student-hero">
+        <div class="hero-content">
+            <h1><i class="fas fa-bell me-2"></i>Notifications</h1>
+            <p>Stay updated with announcements and activity from your teachers</p>
+        </div>
+        <button class="btn btn-light btn-hero" ng-if="unreadCount > 0" ng-click="markAllRead()">
+            <i class="fas fa-check-double me-2"></i>Mark All Read
+        </button>
+    </div>
+
+    <div ng-if="loading" class="text-center py-5"><i class="fas fa-spinner fa-spin fa-3x text-primary"></i></div>
+
+    <div ng-if="!loading && !notifications.length" class="empty-state">
+        <i class="fas fa-bell-slash fa-3x mb-3"></i>
+        <h4>No notifications yet</h4>
+        <p>Notifications from your teachers will appear here</p>
+    </div>
+
+    <div class="notifications-list" ng-if="!loading">
+        <div class="notification-item" ng-repeat="n in notifications" ng-class="{unread: !n.isRead}"
+            ng-click="markRead(n)">
+            <div class="notif-icon-box" ng-class="'type-' + n.type">
+                <i class="fas" ng-class="{
+          'fa-bullhorn': n.type === 'announcement',
+          'fa-question-circle': n.type === 'quiz',
+          'fa-book': n.type === 'course',
+          'fa-info-circle': n.type === 'general'
+        }"></i>
+            </div>
+            <div class="notif-body">
+                <p>{{n.message}}</p>
+                <small>{{n.createdAt | date:'MMM d, yyyy h:mm a'}}</small>
+            </div>
+            <div class="notif-status">
+                <span class="unread-dot" ng-if="!n.isRead"></span>
+                <span class="read-tick" ng-if="n.isRead"><i class="fas fa-check text-muted"></i></span>
+            </div>
+        </div>
+    </div>
+</div>

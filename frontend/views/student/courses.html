@@ -1,0 +1,59 @@
+<!-- Student Browse Courses -->
+<div class="page-container" ng-controller="StudentCourseController">
+    <div class="page-hero student-hero">
+        <div class="hero-content">
+            <h1><i class="fas fa-book me-2"></i>Browse Courses</h1>
+            <p>Discover and enroll in courses taught by expert teachers</p>
+        </div>
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" ng-model="searchText" placeholder="Search courses...">
+        </div>
+    </div>
+
+    <div class="alert alert-success" ng-if="message">{{message}}</div>
+    <div class="alert alert-danger" ng-if="errorMsg">{{errorMsg}}</div>
+
+    <div ng-if="loading" class="text-center py-5"><i class="fas fa-spinner fa-spin fa-3x text-primary"></i></div>
+
+    <div class="courses-grid" ng-if="!loading">
+        <div ng-if="!courses.length" class="empty-state">
+            <i class="fas fa-book-open fa-3x mb-3"></i>
+            <h4>No courses available yet</h4>
+        </div>
+        <div class="course-card browse-card" ng-repeat="c in courses | filter:searchText">
+            <div class="course-card-header">
+                <div class="course-icon large-icon"><i class="fas fa-graduation-cap"></i></div>
+                <span class="enrolled-badge" ng-if="c.isEnrolled"><i class="fas fa-check me-1"></i>Enrolled</span>
+            </div>
+            <h3 class="course-title">{{c.title}}</h3>
+            <p class="course-desc">{{c.description | limitTo:90}}...</p>
+            <div class="course-meta mb-3">
+                <span><i class="fas fa-user me-1"></i>{{c.teacher ? c.teacher.name : 'Instructor'}}</span>
+                <span><i class="fas fa-tag me-1"></i>{{c.category || 'General'}}</span>
+                <span><i class="fas fa-clock me-1"></i>{{c.duration || 'Self-paced'}}</span>
+            </div>
+            <div class="course-content-info">
+                <span ng-if="c.videos && c.videos.length"><i
+                        class="fas fa-video me-1 text-primary"></i>{{c.videos.length}} Video(s)</span>
+                <span ng-if="c.pdfFiles && c.pdfFiles.length"><i
+                        class="fas fa-file-pdf me-1 text-danger"></i>{{c.pdfFiles.length}} PDF(s)</span>
+                <span ng-if="c.assignments && c.assignments.length"><i
+                        class="fas fa-tasks me-1 text-warning"></i>{{c.assignments.length}} assignment(s)</span>
+            </div>
+            <div class="mt-3">
+                <button class="btn btn-primary-grad w-100" ng-if="!c.isEnrolled" ng-click="enroll(c)">
+                    <i class="fas fa-plus me-2"></i>Enroll Now — It's Free!
+                </button>
+                <div class="d-flex gap-2" ng-if="c.isEnrolled">
+                    <a href="#/student/lesson/{{c._id}}" class="btn btn-success w-50">
+                        <i class="fas fa-play me-1"></i>Start Learning
+                    </a>
+                    <a href="#/student/quiz/{{c._id}}" class="btn btn-outline-warning w-50">
+                        <i class="fas fa-question me-1"></i>Quizzes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

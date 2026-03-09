@@ -1,0 +1,63 @@
+<!-- Register Page -->
+<div class="auth-container">
+    <div class="auth-left">
+        <div class="auth-brand">
+            <i class="fas fa-graduation-cap"></i>
+            <h1>EduSpark</h1>
+            <p>Start Your Learning Journey Today</p>
+        </div>
+        <div class="auth-features">
+            <div class="af-item"><i class="fas fa-chalkboard-teacher"></i><span>Create & Manage Courses</span></div>
+            <div class="af-item"><i class="fas fa-users"></i><span>Collaborative Learning</span></div>
+            <div class="af-item"><i class="fas fa-certificate"></i><span>Track Achievements</span></div>
+            <div class="af-item"><i class="fas fa-mobile-alt"></i><span>Access Anywhere</span></div>
+        </div>
+    </div>
+    <div class="auth-right">
+        <div class="auth-card">
+            <h2>Create Account</h2>
+            <p class="auth-sub">Join thousands of learners today</p>
+
+            <div class="alert alert-danger" ng-if="errorMsg" ng-bind="errorMsg"></div>
+
+            <form ng-submit="register()">
+                <div class="form-group">
+                    <label><i class="fas fa-user me-2"></i>Full Name</label>
+                    <input type="text" class="form-control" ng-model="registerData.name" placeholder="John Doe"
+                        required>
+                </div>
+                <div class="form-group mt-3">
+                    <label><i class="fas fa-envelope me-2"></i>Email Address</label>
+                    <input type="email" class="form-control" ng-model="registerData.email" placeholder="you@example.com"
+                        required>
+                </div>
+                <div class="form-group mt-3">
+                    <label><i class="fas fa-lock me-2"></i>Password</label>
+                    <input type="password" class="form-control" ng-model="registerData.password"
+                        placeholder="Min. 6 characters" required>
+                </div>
+                <div class="form-group mt-3">
+                    <label><i class="fas fa-user-tag me-2"></i>I am a...</label>
+                    <div class="role-selector mt-2">
+                        <label class="role-option" ng-class="{active: registerData.role === 'teacher'}">
+                            <input type="radio" ng-model="registerData.role" value="teacher">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            <span>Teacher</span>
+                        </label>
+                        <label class="role-option" ng-class="{active: registerData.role === 'student'}">
+                            <input type="radio" ng-model="registerData.role" value="student">
+                            <i class="fas fa-user-graduate"></i>
+                            <span>Student</span>
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary-grad w-100 mt-4" ng-disabled="loading">
+                    <span ng-if="!loading"><i class="fas fa-rocket me-2"></i>Create Account</span>
+                    <span ng-if="loading"><i class="fas fa-spinner fa-spin me-2"></i>Creating...</span>
+                </button>
+            </form>
+
+            <p class="auth-switch mt-4">Already have an account? <a href="#/login">Sign in here</a></p>
+        </div>
+    </div>
+</div>

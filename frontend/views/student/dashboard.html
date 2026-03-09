@@ -1,0 +1,98 @@
+<!-- Student Dashboard -->
+<div class="page-container" ng-controller="StudentDashboardController">
+    <div class="page-hero student-hero">
+        <div class="hero-content">
+            <h1><i class="fas fa-user-graduate me-2"></i>Student Dashboard</h1>
+            <p>Welcome back, <strong>{{user.name}}</strong>! Keep up the great work!</p>
+        </div>
+        <a href="#/student/courses" class="btn btn-light btn-hero">
+            <i class="fas fa-search me-2"></i>Browse Courses
+        </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card blue">
+            <div class="stat-icon"><i class="fas fa-book-reader"></i></div>
+            <div class="stat-info">
+                <h3>{{courses.length}}</h3>
+                <p>Enrolled Courses</p>
+            </div>
+        </div>
+        <div class="stat-card green">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-info">
+                <h3>{{getOverallProgress()}}%</h3>
+                <p>Overall Progress</p>
+            </div>
+        </div>
+        <div class="stat-card purple">
+            <div class="stat-icon"><i class="fas fa-bell"></i></div>
+            <div class="stat-info">
+                <h3>{{unreadCount}}</h3>
+                <p>Unread Notifications</p>
+            </div>
+        </div>
+        <div class="stat-card orange">
+            <div class="stat-icon"><i class="fas fa-star"></i></div>
+            <div class="stat-info">
+                <h3>{{progressList.length}}</h3>
+                <p>Active Courses</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enrolled Courses -->
+    <div class="section mt-4">
+        <h2 class="section-title">My Courses</h2>
+        <div ng-if="loading" class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i></div>
+
+        <div ng-if="!loading && !courses.length" class="empty-state">
+            <i class="fas fa-graduation-cap fa-3x mb-3"></i>
+            <h4>No courses yet</h4>
+            <a href="#/student/courses" class="btn btn-primary-grad">Browse & Enroll Now</a>
+        </div>
+
+        <div class="student-courses-grid" ng-if="!loading && courses.length">
+            <div class="student-course-card" ng-repeat="c in courses">
+                <div class="sc-header">
+                    <div class="sc-icon"><i class="fas fa-play-circle"></i></div>
+                    <div class="sc-teacher"><i class="fas fa-user me-1"></i>{{c.teacher ? c.teacher.name :
+                        'Instructor'}}</div>
+                </div>
+                <h4>{{c.title}}</h4>
+                <p>{{c.description | limitTo:60}}...</p>
+                <div class="sc-progress">
+                    <div class="sc-progress-label">
+                        <span>Progress</span>
+                        <span>{{c.progress || 0}}%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" ng-style="{width: (c.progress || 0) + '%'}"></div>
+                    </div>
+                </div>
+                <div class="sc-actions mt-3">
+                    <a href="#/student/lesson/{{c._id}}" class="btn btn-primary-grad btn-sm">
+                        <i class="fas fa-play me-1"></i>Continue Learning
+                    </a>
+                    <a href="#/student/quiz/{{c._id}}" class="btn btn-outline-warning btn-sm ms-1">
+                        <i class="fas fa-question me-1"></i>Quizzes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Notifications -->
+    <div class="section mt-4" ng-if="recentNotifications.length">
+        <h2 class="section-title">Recent Notifications</h2>
+        <div class="notif-list">
+            <div class="notif-item" ng-repeat="n in recentNotifications" ng-class="{unread: !n.isRead}">
+                <i class="fas fa-bell notif-icon"></i>
+                <p>{{n.message}}</p>
+                <small>{{n.createdAt | date:'MMM d'}}</small>
+            </div>
+        </div>
+        <a href="#/student/notifications" class="btn btn-outline-primary btn-sm mt-2">View All</a>
+    </div>
+</div>

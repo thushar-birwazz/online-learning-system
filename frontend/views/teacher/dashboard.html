@@ -1,0 +1,85 @@
+<!-- Teacher Dashboard -->
+<div class="page-container" ng-controller="TeacherDashboardController">
+    <!-- Hero Header -->
+    <div class="page-hero">
+        <div class="hero-content">
+            <h1><i class="fas fa-chalkboard-teacher me-2"></i>Teacher Dashboard</h1>
+            <p>Welcome back, <strong>{{user.name}}</strong>! Here's an overview of your teaching activity.</p>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card blue">
+            <div class="stat-icon"><i class="fas fa-book-open"></i></div>
+            <div class="stat-info">
+                <h3>{{totalCourses()}}</h3>
+                <p>Courses Created</p>
+            </div>
+        </div>
+        <div class="stat-card purple">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+                <h3>{{totalStudents()}}</h3>
+                <p>Total Students</p>
+            </div>
+        </div>
+        <div class="stat-card green">
+            <div class="stat-icon"><i class="fas fa-question-circle"></i></div>
+            <div class="stat-info">
+                <h3>{{totalQuizzes()}}</h3>
+                <p>Quizzes Published</p>
+            </div>
+        </div>
+        <div class="stat-card orange">
+            <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+            <div class="stat-info">
+                <h3>{{totalEnrollments()}}</h3>
+                <p>Total Enrollments</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h2 class="section-title">Quick Actions</h2>
+        <div class="action-grid">
+            <a href="#/teacher/courses" class="action-card">
+                <i class="fas fa-plus-circle"></i>
+                <span>Manage Courses</span>
+            </a>
+            <a href="#/teacher/quizzes" class="action-card">
+                <i class="fas fa-file-alt"></i>
+                <span>Create Quiz</span>
+            </a>
+            <a href="#/teacher/progress" class="action-card">
+                <i class="fas fa-chart-bar"></i>
+                <span>View Progress</span>
+            </a>
+            <a href="#/teacher/announcements" class="action-card">
+                <i class="fas fa-bullhorn"></i>
+                <span>Post Announcement</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Courses -->
+    <div class="section mt-4">
+        <h2 class="section-title">Recent Courses</h2>
+        <div ng-if="loading" class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i></div>
+        <div class="courses-list" ng-if="!loading">
+            <div class="course-row" ng-repeat="c in courses | limitTo:5">
+                <div class="course-row-icon"><i class="fas fa-book"></i></div>
+                <div class="course-row-info">
+                    <h4>{{c.title}}</h4>
+                    <p>{{c.category || 'General'}} • {{c.duration || 'N/A'}}</p>
+                </div>
+                <a href="#/teacher/courses" class="btn btn-sm btn-outline-primary">Manage</a>
+            </div>
+            <div ng-if="!courses.length" class="empty-state">
+                <i class="fas fa-book-open fa-3x mb-3 text-muted"></i>
+                <p>No courses yet. <a href="#/teacher/courses">Create your first course</a></p>
+            </div>
+        </div>
+    </div>
+</div>

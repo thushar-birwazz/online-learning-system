@@ -1,0 +1,94 @@
+<!-- Teacher Announcements -->
+<div class="page-container" ng-controller="TeacherAnnouncementController">
+    <div class="page-hero">
+        <div class="hero-content">
+            <h1><i class="fas fa-bullhorn me-2"></i>Announcements</h1>
+            <p>Post announcements to your students — they'll receive instant notifications</p>
+        </div>
+        <button class="btn btn-light btn-hero" ng-click="showForm = !showForm">
+            <i class="fas fa-plus me-2"></i>Post Announcement
+        </button>
+    </div>
+
+    <div class="alert alert-success" ng-if="message">{{message}}</div>
+    <div class="alert alert-danger" ng-if="errorMsg">{{errorMsg}}</div>
+
+    <!-- Post Form -->
+    <div class="form-card" ng-if="showForm">
+        <h3><i class="fas fa-pen me-2"></i>New Announcement</h3>
+        <form ng-submit="post()">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <label>Title *</label>
+                        <input type="text" class="form-control" ng-model="formData.title"
+                            placeholder="e.g. Class postponed to next week" required>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Target Course (optional)</label>
+                        <select class="form-control" ng-model="formData.courseId">
+                            <option value="">All Students</option>
+                            <option ng-repeat="c in courses" value="{{c._id}}">{{c.title}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group mt-3">
+                <label>Message *</label>
+                <textarea class="form-control" ng-model="formData.body" rows="4"
+                    placeholder="Write your announcement here..." required></textarea>
+            </div>
+            <div class="mt-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary-grad">
+                    <i class="fas fa-paper-plane me-2"></i>Post & Notify Students
+                </button>
+                <button type="button" class="btn btn-secondary" ng-click="showForm = false">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Announcements List -->
+    <div class="section mt-4">
+        <div ng-if="!announcements.length" class="empty-state">
+            <i class="fas fa-bullhorn fa-3x mb-3"></i>
+            <h4>No announcements yet</h4>
+        </div>
+        <div class="announcement-card" ng-repeat="a in announcements">
+            <div class="announcement-header">
+                <div class="annc-icon"><i class="fas fa-bullhorn"></i></div>
+                <div class="annc-meta">
+                    <h4>{{a.title}}</h4>
+                    <p><i class="fas fa-book me-1"></i>{{a.courseName}} &nbsp;•&nbsp; {{a.createdAt | date:'MMM d, y,
+                        h:mm a'}}</p>
+                </div>
+            </div>
+            <p class="annc-body">{{a.body}}</p>
+
+            <!-- Replies -->
+            <div class="replies-section" ng-if="a.replies.length">
+                <h6><i class="fas fa-comments me-2"></i>Replies ({{a.replies.length}})</h6>
+                <div class="reply-item" ng-repeat="r in a.replies">
+                    <div class="reply-avatar">{{r.userName[0] | uppercase}}</div>
+                    <div class="reply-content">
+                        <strong>{{r.userName}}</strong>
+                        <span class="badge ms-1"
+                            ng-class="r.userRole === 'teacher' ? 'badge-teacher' : 'badge-student'">{{r.userRole}}</span>
+                        <p>{{r.message}}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reply Input -->
+            <div class="reply-form mt-2">
+                <div class="input-group">
+                    <input type="text" class="form-control" ng-model="replyText[a._id]" placeholder="Write a reply...">
+                    <button class="btn btn-primary-grad" ng-click="reply(a._id)" ng-disabled="!replyText[a._id]">
+                        <i class="fas fa-reply me-1"></i>Reply
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,128 @@
+<!-- Student Lesson Page -->
+<div class="page-container">
+    <div ng-if="loading" class="text-center py-5"><i class="fas fa-spinner fa-spin fa-3x text-primary"></i></div>
+
+    <div ng-if="!loading && course">
+        <div class="page-hero student-hero">
+            <div class="hero-content">
+                <h1><i class="fas fa-play-circle me-2"></i>{{course.title}}</h1>
+                <p>{{course.description}}</p>
+            </div>
+            <div class="hero-progress">
+                <div class="progress-circle" ng-style="{'--pct': (progress ? progress.percentage : 0) + '%'}">
+                    <span>{{progress ? progress.percentage : 0}}%</span>
+                </div>
+                <p>Course Progress</p>
+            </div>
+        </div>
+
+        <div class="alert alert-success" ng-if="message">{{message}}</div>
+
+        <div class="lesson-layout">
+            <!-- Video Section -->
+            <div class="lesson-main">
+                <!-- Current Video Player -->
+                <div class="video-section" ng-if="currentVideo">
+                    <h3><i class="fas fa-video me-2 text-primary"></i>{{currentVideo.title}}</h3>
+                    <div class="video-player-container">
+                        <video controls class="video-player" id="lessonVideo" ng-src="{{currentVideo.url | trustUrl}}">
+                            Your browser does not support video playback.
+                        </video>
+                    </div>
+                    <div class="video-time-info mt-2 d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>Watched: {{formatTime(getVideoWatched(currentVideo._id))}}
+                            <span ng-if="currentVideo.duration"> / {{formatTime(currentVideo.duration)}}</span>
+                        </small>
+                        <span class="badge"
+                            ng-class="isVideoCompleted(currentVideo._id) ? 'bg-success' : 'bg-secondary'">
+                            {{isVideoCompleted(currentVideo._id) ? '✅ Completed' : 'In Progress'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="empty-video" ng-if="!course.videos || !course.videos.length">
+                    <i class="fas fa-video-slash fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No videos uploaded for this course yet</p>
+                </div>
+
+                <!-- Video Playlist -->
+                <div class="video-playlist mt-4" ng-if="course.videos && course.videos.length">
+                    <h4><i class="fas fa-list me-2 text-primary"></i>Video Playlist
+                        <span class="badge bg-primary ms-1">{{course.videos.length}}</span>
+                    </h4>
+                    <div class="playlist-items">
+                        <div class="playlist-item" ng-repeat="v in course.videos"
+                            ng-class="{active: currentVideo && currentVideo._id === v._id, completed: isVideoCompleted(v._id)}"
+                            ng-click="playVideo(v)">
+                            <div class="playlist-num">{{$index + 1}}</div>
+                            <div class="playlist-info">
+                                <span class="playlist-title">{{v.title}}</span>
+                                <small class="text-muted" ng-if="v.duration">{{formatTime(v.duration)}}</small>
+                            </div>
+                            <div class="playlist-status">
+                                <i class="fas fa-check-circle text-success" ng-if="isVideoCompleted(v._id)"></i>
+                                <i class="fas fa-play-circle text-primary"
+                                    ng-if="!isVideoCompleted(v._id) && currentVideo && currentVideo._id === v._id"></i>
+                                <i class="fas fa-circle text-muted"
+                                    ng-if="!isVideoCompleted(v._id) && (!currentVideo || currentVideo._id !== v._id)"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assignments Section -->
+                <div class="assignments-section mt-4" ng-if="course.assignments && course.assignments.length">
+                    <h3><i class="fas fa-tasks me-2 text-warning"></i>Assignments</h3>
+                    <div class="assignment-card" ng-repeat="a in course.assignments">
+                        <div class="assignment-info">
+                            <i class="fas fa-clipboard me-2"></i>
+                            <div>
+                                <h5>{{a.title}}</h5>
+                                <p ng-if="a.description">{{a.description}}</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm"
+                            ng-class="isAssignmentDone(a._id) ? 'btn-success' : 'btn-outline-warning'"
+                            ng-click="markAssignmentDone(a._id)">
+                            <i class="fas" ng-class="isAssignmentDone(a._id) ? 'fa-check' : 'fa-tasks'"></i>
+                            {{isAssignmentDone(a._id) ? 'Completed!' : 'Mark Done'}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar: PDFs and Navigation -->
+            <div class="lesson-sidebar">
+                <!-- PDF Downloads -->
+                <div class="sidebar-section">
+                    <h4><i class="fas fa-file-pdf me-2 text-danger"></i>Study Materials</h4>
+                    <div ng-if="!course.pdfFiles || !course.pdfFiles.length" class="text-muted small p-2">
+                        No PDF files yet
+                    </div>
+                    <a class="pdf-download-btn" ng-repeat="pdf in course.pdfFiles" ng-href="{{pdf.url}}" target="_blank"
+                        download>
+                        <i class="fas fa-download me-2"></i>{{pdf.name}}
+                    </a>
+                </div>
+
+                <!-- Course Actions -->
+                <div class="sidebar-section mt-3">
+                    <h4><i class="fas fa-bolt me-2 text-warning"></i>Quick Actions</h4>
+                    <a href="#/student/quiz/{{courseId}}" class="btn btn-warning w-100 mb-2">
+                        <i class="fas fa-question-circle me-2"></i>Take Quiz
+                    </a>
+                    <a href="#/student/progress" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-chart-line me-2"></i>View Progress
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div ng-if="!loading && !course" class="empty-state">
+        <i class="fas fa-exclamation-circle fa-3x mb-3 text-muted"></i>
+        <h4>Course not found or not enrolled</h4>
+        <a href="#/student/courses" class="btn btn-primary-grad">Browse Courses</a>
+    </div>
+</div>

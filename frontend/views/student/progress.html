@@ -1,0 +1,98 @@
+<!-- Student Progress Page -->
+<div class="page-container" ng-controller="StudentProgressController">
+    <div class="page-hero student-hero">
+        <div class="hero-content">
+            <h1><i class="fas fa-chart-line me-2"></i>My Progress</h1>
+            <p>Track your learning journey and quiz performance across all courses</p>
+        </div>
+        <div class="hero-stat">
+            <div class="big-stat">{{getOverallAvg()}}%</div>
+            <p>Overall Average</p>
+        </div>
+    </div>
+
+    <div ng-if="loading" class="text-center py-5"><i class="fas fa-spinner fa-spin fa-3x text-primary"></i></div>
+
+    <div ng-if="!loading && !progressList.length" class="empty-state">
+        <i class="fas fa-chart-bar fa-3x mb-3"></i>
+        <h4>No progress data yet</h4>
+        <a href="#/student/courses" class="btn btn-primary-grad">Start Learning!</a>
+    </div>
+
+    <div class="progress-cards" ng-if="!loading">
+        <div class="prog-card" ng-repeat="prog in progressList">
+            <div class="prog-card-header">
+                <h4><i class="fas fa-book me-2"></i>{{prog.course.title}}</h4>
+                <div class="prog-badge"
+                    ng-class="prog.percentage >= 70 ? 'badge-green' : prog.percentage >= 40 ? 'badge-orange' : 'badge-red'">
+                    {{prog.percentage}}%
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-bar-section mb-3">
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                    <span>Course Completion</span>
+                    <span>{{prog.percentage}}%</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" ng-style="{width: prog.percentage + '%'}"
+                        ng-class="prog.percentage >= 70 ? 'bg-success' : prog.percentage >= 40 ? 'bg-warning' : 'bg-danger'">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Watch Progress -->
+            <div class="prog-status-grid">
+                <div class="status-item" ng-repeat="vp in prog.videoProgress"
+                    ng-class="vp.completed ? 'done' : 'pending'">
+                    <i class="fas" ng-class="vp.completed ? 'fa-check-circle' : 'fa-circle'"></i>
+                    <span>Video {{$index + 1}}: {{formatTime(vp.watchedSeconds)}} watched</span>
+                </div>
+                <div class="status-item" ng-if="!prog.videoProgress || !prog.videoProgress.length" class="pending">
+                    <i class="fas fa-circle"></i>
+                    <span>No videos watched yet</span>
+                </div>
+            </div>
+
+            <!-- Total Watch Time -->
+            <div class="mt-2 small text-muted" ng-if="prog.totalWatchedSeconds">
+                <i class="fas fa-clock me-1"></i>Total time watched: {{formatTime(prog.totalWatchedSeconds)}}
+            </div>
+
+            <!-- Assignment & Quiz Status -->
+            <div class="prog-status-grid mt-2">
+                <div class="status-item" ng-class="prog.assignmentsCompleted.length > 0 ? 'done' : 'pending'">
+                    <i class="fas"
+                        ng-class="prog.assignmentsCompleted.length > 0 ? 'fa-check-circle' : 'fa-circle'"></i>
+                    <span>Assignments ({{prog.assignmentsCompleted.length}})</span>
+                </div>
+                <div class="status-item" ng-class="prog.quizScores.length > 0 ? 'done' : 'pending'">
+                    <i class="fas" ng-class="prog.quizScores.length > 0 ? 'fa-check-circle' : 'fa-circle'"></i>
+                    <span>Quizzes ({{prog.quizScores.length}} taken)</span>
+                </div>
+            </div>
+
+            <!-- Quiz Score History -->
+            <div class="quiz-history mt-3" ng-if="prog.quizScores.length">
+                <h6><i class="fas fa-trophy me-2 text-warning"></i>Quiz Results</h6>
+                <div class="quiz-score-row" ng-repeat="qs in prog.quizScores">
+                    <span class="quiz-name">{{qs.quizTitle}}</span>
+                    <div class="quiz-score-bar">
+                        <div class="quiz-score-fill" ng-style="{width: qs.percentage + '%'}"
+                            ng-class="qs.percentage >= 50 ? 'bg-success' : 'bg-danger'"></div>
+                    </div>
+                    <span class="quiz-pct fw-bold" ng-class="qs.percentage >= 50 ? 'text-success' : 'text-danger'">
+                        {{qs.score}}/{{qs.totalMarks}} ({{qs.percentage}}%)
+                    </span>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <a href="#/student/lesson/{{prog.course._id}}" class="btn btn-sm btn-outline-primary me-2">
+                    <i class="fas fa-play me-1"></i>Continue
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

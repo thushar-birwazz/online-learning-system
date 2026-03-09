@@ -1,0 +1,144 @@
+<!-- Student Quiz Page -->
+<div class="page-container">
+    <div ng-if="loading" class="text-center py-5"><i class="fas fa-spinner fa-spin fa-3x text-primary"></i></div>
+
+    <!-- Quiz Lobby (no quiz started) -->
+    <div ng-if="!loading && !quizStarted">
+        <div class="page-hero student-hero">
+            <div class="hero-content">
+                <h1><i class="fas fa-question-circle me-2"></i>Course Quizzes</h1>
+                <p>Test your knowledge — all quizzes are auto-evaluated with instant results</p>
+            </div>
+        </div>
+
+        <div ng-if="!quizzes.length" class="empty-state">
+            <i class="fas fa-file-alt fa-3x mb-3"></i>
+            <h4>No quizzes available yet</h4>
+            <p class="text-muted">Check back later when your teacher adds quizzes</p>
+        </div>
+
+        <div class="quiz-list">
+            <div class="quiz-lobby-card" ng-repeat="quiz in quizzes">
+                <div class="quiz-lobby-icon"><i class="fas fa-stopwatch"></i></div>
+                <div class="quiz-lobby-info">
+                    <h3>{{quiz.title}}</h3>
+                    <div class="quiz-lobby-meta">
+                        <span><i class="fas fa-clock me-1"></i>{{quiz.timer}} minutes</span>
+                        <span><i class="fas fa-star me-1"></i>{{quiz.totalMarks}} total marks</span>
+                        <span><i class="fas fa-list me-1"></i>{{quiz.questions.length}} questions</span>
+                        <span ng-if="quiz.passingMarks"><i class="fas fa-check-circle me-1 text-success"></i>Pass:
+                            {{quiz.passingMarks}} marks</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary-grad quiz-start-btn" ng-click="startQuiz(quiz)"
+                    ng-if="!isQuizAttempted(quiz._id)">
+                    <i class="fas fa-play me-2"></i>Start Quiz
+                </button>
+                <span class="btn btn-success quiz-start-btn" ng-if="isQuizAttempted(quiz._id)" style="cursor: default;">
+                    <i class="fas fa-check-circle me-2"></i>Already Attempted
+                </span>
+                <div class="quiz-score-info mt-2" ng-if="isQuizAttempted(quiz._id) && getQuizScore(quiz._id)"
+                    style="text-align:center;">
+                    <span style="font-size:1.1rem;font-weight:700;color:#22c55e;">
+                        {{getQuizScore(quiz._id).score}} / {{getQuizScore(quiz._id).totalMarks}}
+                    </span>
+                    <small style="display:block;color:#94a3b8;">Score: {{getQuizScore(quiz._id).percentage}}%</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Quiz -->
+    <div ng-if="quizStarted && !quizSubmitted">
+        <div class="quiz-header-bar">
+            <div class="quiz-title-bar"><i class="fas fa-file-alt me-2"></i>{{selectedQuiz.title}}</div>
+            <div class="quiz-timer-box" ng-class="{danger: timeLeft < 60}">
+                <i class="fas fa-clock me-2"></i>
+                <span class="timer-display">{{formatTime(timeLeft)}}</span>
+            </div>
+        </div>
+
+        <div class="quiz-progress-bar">
+            <div class="quiz-pb-fill"
+                ng-style="{width: (getAnsweredCount() / selectedQuiz.questions.length * 100) + '%'}">
+            </div>
+        </div>
+        <p class="quiz-answered-info">{{getAnsweredCount()}} of {{selectedQuiz.questions.length}}
+            questions answered</p>
+
+        <div class="questions-container">
+            <div class="mcq-card" ng-repeat="q in selectedQuiz.questions">
+                <div class="mcq-question-num">Question {{$index + 1}} / {{selectedQuiz.questions.length}} <span
+                        class="marks-badge">{{q.marks}} mark(s)</span></div>
+                <h4 class="mcq-text">{{q.text}}</h4>
+                <div class="mcq-options">
+                    <label class="mcq-option" ng-repeat="opt in q.options"
+                        ng-class="{selected: answers[$parent.$index] === $index}"
+                        ng-click="selectAnswer($parent.$index, $index)">
+                        <span class="opt-letter">{{['A','B','C','D'][$index]}}</span>
+                        <span class="opt-text">{{opt}}</span>
+                        <span class="opt-check" ng-if="answers[$parent.$index] === $index"><i
+                                class="fas fa-check-circle"></i></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="quiz-submit-bar">
+            <button class="btn btn-primary-grad btn-lg" ng-click="submitQuiz(false)">
+                <i class="fas fa-paper-plane me-2"></i>Submit Quiz
+            </button>
+        </div>
+    </div>
+
+    <!-- Quiz Results -->
+    <div ng-if="quizSubmitted && result && !result.error">
+        <div class="result-hero" ng-class="result.passed ? 'result-pass' : 'result-fail'">
+            <div class="result-icon">
+                <i class="fas" ng-class="result.passed ? 'fa-trophy' : 'fa-times-circle'"></i>
+            </div>
+            <h2>{{result.passed ? 'Congratulations! You Passed! 🎉' : 'Better Luck Next Time!'}}</h2>
+            <div class="result-score">
+                <span class="score-big">{{result.score}}</span>
+                <span class="score-sep">/</span>
+                <span class="score-total">{{result.totalMarks}}</span>
+            </div>
+            <div class="score-pct">{{result.percentage}}%</div>
+        </div>
+
+        <div class="result-review">
+            <h3 class="section-title"><i class="fas fa-search me-2"></i>Answer Review</h3>
+            <div class="review-card" ng-repeat="q in selectedQuiz.questions">
+                <div class="review-question">
+                    <span class="review-num">Q{{$index + 1}}</span>
+                    <p>{{q.text}}</p>
+                    <span class="review-status" ng-class="result.answers[$index].isCorrect ? 'correct' : 'incorrect'">
+                        <i class="fas" ng-class="result.answers[$index].isCorrect ? 'fa-check' : 'fa-times'"></i>
+                        {{result.answers[$index].isCorrect ? 'Correct' : 'Incorrect'}}
+                    </span>
+                </div>
+                <div class="review-options">
+                    <div class="review-opt" ng-repeat="opt in q.options"
+                        ng-class="getAnswerClass($parent.$index, $index)">
+                        <span class="opt-letter">{{['A','B','C','D'][$index]}}</span>
+                        <span>{{opt}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4 mb-5">
+            <a href="#/student/dashboard" class="btn btn-primary-grad">
+                <i class="fas fa-home me-2"></i>Back to Dashboard
+            </a>
+            <a href="#/student/progress" class="btn btn-outline-primary ms-2">
+                <i class="fas fa-chart-line me-2"></i>View Progress
+            </a>
+        </div>
+    </div>
+
+    <div ng-if="quizSubmitted && result && result.error" class="empty-state">
+        <i class="fas fa-exclamation-triangle fa-3x mb-3 text-danger"></i>
+        <h4>{{result.error}}</h4>
+    </div>
+</div>
