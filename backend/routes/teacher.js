@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const { uploadToGridFS, deleteFromGridFS } = require('../middleware/gridfs');
 const Course = require('../models/Course');
 const Quiz = require('../models/Quiz');
 const Progress = require('../models/Progress');
@@ -66,10 +67,13 @@ router.post('/courses/:id/upload-video', upload.single('video'), async (req, res
         const course = await Course.findOne({ _id: req.params.id, teacher: req.user.id });
         if (!course) return res.status(404).json({ message: 'Course not found' });
         if (!req.file) return res.status(400).json({ message: 'No video file uploaded' });
+        // Upload to GridFS
+        const fileId = await uploadToGridFS(req.file.buffer, req.file.originalname, req.file.mimetype);
         const duration = req.body.duration ? Number(req.body.duration) : 0;
         course.videos.push({
             title: req.body.title || req.file.originalname,
-            url: '/uploads/' + req.file.filename,
+            url: '/api/files/' + fileId,
+            fileId: fileId,
             duration: duration
         });
         await course.save();
@@ -82,6 +86,11 @@ router.delete('/courses/:id/videos/:videoId', async (req, res) => {
     try {
         const course = await Course.findOne({ _id: req.params.id, teacher: req.user.id });
         if (!course) return res.status(404).json({ message: 'Course not found' });
+        // Find the video to get its GridFS fileId
+        const video = course.videos.find(v => v._id.toString() === req.params.videoId);
+        if (video && video.fileId) {
+            try { await deleteFromGridFS(video.fileId); } catch (e) { /* file may already be deleted */ }
+        }
         course.videos = course.videos.filter(v => v._id.toString() !== req.params.videoId);
         await course.save();
         res.json({ videos: course.videos });
@@ -94,7 +103,9 @@ router.post('/courses/:id/upload-pdf', upload.single('pdf'), async (req, res) =>
         const course = await Course.findOne({ _id: req.params.id, teacher: req.user.id });
         if (!course) return res.status(404).json({ message: 'Course not found' });
         if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
-        course.pdfFiles.push({ name: req.file.originalname, url: '/uploads/' + req.file.filename });
+        // Upload to GridFS
+        const fileId = await uploadToGridFS(req.file.buffer, req.file.originalname, req.file.mimetype);
+        course.pdfFiles.push({ name: req.file.originalname, url: '/api/files/' + fileId, fileId: fileId });
         await course.save();
         res.json({ pdfFiles: course.pdfFiles });
     } catch (err) { res.status(500).json({ message: err.message }); }
@@ -258,22 +269,8 @@ router.post('/announcements', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// POST reply to announcement
-router.post('/announcements/:id/reply', async (req, res) => {
-    try {
-        const { message } = req.body;
-        const announcement = await Announcement.findById(req.params.id);
-        if (!announcement) return res.status(404).json({ message: 'Announcement not found' });
-        announcement.replies.push({
-            user: req.user.id,
-            userName: req.user.name,
-            userRole: req.user.role,
-            message
-        });
-        await announcement.save();
-        res.json(announcement);
-    } catch (err) { res.status(500).json({ message: err.message }); }
-});
+
+
 
 // GET all students list
 router.get('/students', async (req, res) => {

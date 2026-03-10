@@ -3,7 +3,7 @@
     <div class="page-hero student-hero">
         <div class="hero-content">
             <h1><i class="fas fa-newspaper me-2"></i>Announcements</h1>
-            <p>Read messages from your teachers and join the discussion</p>
+            <p>Stay updated with messages from your teachers</p>
         </div>
     </div>
 
@@ -30,35 +30,7 @@
             </div>
             <p class="annc-body">{{a.body}}</p>
 
-            <!-- Replies -->
-            <div class="replies-section" ng-if="a.replies.length">
-                <h6><i class="fas fa-comments me-2"></i>Discussion ({{a.replies.length}})</h6>
-                <div class="reply-item" ng-repeat="r in a.replies">
-                    <div class="reply-avatar" ng-class="r.userRole === 'teacher' ? 'teacher-av' : 'student-av'">
-                        {{r.userName[0] | uppercase}}
-                    </div>
-                    <div class="reply-content">
-                        <strong>{{r.userName}}</strong>
-                        <span class="badge ms-1"
-                            ng-class="r.userRole === 'teacher' ? 'badge-teacher' : 'badge-student'">
-                            {{r.userRole}}
-                        </span>
-                        <small class="ms-2 text-muted">{{r.date | date:'MMM d'}}</small>
-                        <p>{{r.message}}</p>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Reply Input -->
-            <div class="reply-form mt-3">
-                <div class="input-group">
-                    <input type="text" class="form-control" ng-model="replyText[a._id]"
-                        placeholder="Share your thoughts...">
-                    <button class="btn btn-primary-grad" ng-click="reply(a)" ng-disabled="!replyText[a._id]">
-                        <i class="fas fa-paper-plane me-1"></i>Reply
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 </div>

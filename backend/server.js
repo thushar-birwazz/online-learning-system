@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const { streamFromGridFS } = require('./middleware/gridfs');
 
 const app = express();
 
@@ -11,8 +12,14 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve upload files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Stream files from GridFS
+app.get('/api/files/:id', async (req, res) => {
+    try {
+        await streamFromGridFS(req.params.id, req, res);
+    } catch (err) {
+        res.status(404).json({ message: 'File not found' });
+    }
+});
 
 // Serve AngularJS frontend
 app.use(express.static(path.join(__dirname, '../frontend')));
@@ -24,7 +31,7 @@ app.use('/api/student', require('./routes/student'));
 
 // Fallback to index.html for AngularJS SPA
 app.use((req, res, next) => {
-    if (req.method === 'GET' && !req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
+    if (req.method === 'GET' && !req.path.startsWith('/api')) {
         res.sendFile(path.join(__dirname, '../frontend/index.html'));
     } else {
         next();

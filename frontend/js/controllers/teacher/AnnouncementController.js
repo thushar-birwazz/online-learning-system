@@ -5,7 +5,6 @@ angular.module('lmsApp')
             $scope.courses = [];
             $scope.formData = { title: '', body: '', courseId: '' };
             $scope.showForm = false;
-            $scope.replyText = {};
             $scope.message = '';
             $scope.errorMsg = '';
 
@@ -26,13 +25,5 @@ angular.module('lmsApp')
                     $scope.showForm = false;
                     loadData();
                 }).catch(e => { $scope.errorMsg = e.data ? e.data.message : 'Error'; });
-            };
-
-            $scope.reply = function (id) {
-                if (!$scope.replyText[id]) return;
-                NotificationService.replyTeacher(id, { message: $scope.replyText[id] }).then(r => {
-                    $scope.replyText[id] = '';
-                    loadData();
-                });
             };
         }]);

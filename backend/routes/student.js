@@ -257,20 +257,7 @@ router.get('/announcements', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-router.post('/announcements/:id/reply', async (req, res) => {
-    try {
-        const { message } = req.body;
-        const announcement = await Announcement.findById(req.params.id);
-        if (!announcement) return res.status(404).json({ message: 'Announcement not found' });
-        announcement.replies.push({
-            user: req.user.id,
-            userName: req.user.name,
-            userRole: req.user.role,
-            message
-        });
-        await announcement.save();
-        res.json(announcement);
-    } catch (err) { res.status(500).json({ message: err.message }); }
-});
+
+
 
 module.exports = router;

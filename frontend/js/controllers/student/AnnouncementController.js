@@ -3,8 +3,6 @@ angular.module('lmsApp')
         function ($scope, NotificationService) {
             $scope.announcements = [];
             $scope.loading = true;
-            $scope.replyText = {};
-            $scope.message = '';
 
             function loadAnnouncements() {
                 NotificationService.getStudentAnnouncements().then(r => {
@@ -13,13 +11,4 @@ angular.module('lmsApp')
                 }).catch(() => { $scope.loading = false; });
             }
             loadAnnouncements();
-
-            $scope.reply = function (announcement) {
-                if (!$scope.replyText[announcement._id]) return;
-                NotificationService.replyStudent(announcement._id, { message: $scope.replyText[announcement._id] }).then(r => {
-                    $scope.replyText[announcement._id] = '';
-                    $scope.message = 'Reply posted!';
-                    loadAnnouncements();
-                });
-            };
         }]);
