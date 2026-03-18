@@ -30,6 +30,9 @@ app.use('/api/teacher', require('./routes/teacher'));
 app.use('/api/student', require('./routes/student'));
 
 // Fallback to index.html for AngularJS SPA
+// Serve legacy uploads directory for older files BEFORE falling back to index.html
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use((req, res, next) => {
     if (req.method === 'GET' && !req.path.startsWith('/api')) {
         res.sendFile(path.join(__dirname, '../frontend/index.html'));

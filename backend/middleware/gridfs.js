@@ -67,8 +67,35 @@ async function streamFromGridFS(fileId, req, res) {
 
     const file = files[0];
     const fileSize = file.length;
-    const contentType = file.contentType || 'application/octet-stream';
+    let contentType = file.contentType || 'application/octet-stream';
+    const filename = file.filename || 'download';
+    
+    // Better content type inference
+    if (contentType === 'application/octet-stream' || !contentType) {
+        const ext = require('path').extname(filename).toLowerCase();
+        const mimeTypes = {
+            '.pdf': 'application/pdf',
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.doc': 'application/msword',
+            '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        };
+        if (mimeTypes[ext]) {
+            contentType = mimeTypes[ext];
+        }
+    }
+
     const range = req.headers.range;
+
+    // Determine if file should be downloaded or displayed inline
+    // Videos stream inline; PDFs and other files download as attachments
+    const isVideo = contentType.startsWith('video/');
+    // Just use basic filename without URL encoding which can confuse some browsers
+    const disposition = isVideo ? 'inline' : `attachment; filename="${filename}"`;
+
+    // Prevent browsers from sniffing Content-Type
+    res.setHeader('X-Content-Type-Options', 'nosniff');
 
     if (range) {
         // Parse Range header (e.g., "bytes=0-1023")
@@ -82,7 +109,8 @@ async function streamFromGridFS(fileId, req, res) {
             'Content-Range': `bytes ${start}-${end}/${fileSize}`,
             'Accept-Ranges': 'bytes',
             'Content-Length': chunkSize,
-            'Content-Type': contentType
+            'Content-Type': contentType,
+            'Content-Disposition': disposition
         });
 
         const downloadStream = bucket.openDownloadStream(id, { start, end: end + 1 });
@@ -94,7 +122,8 @@ async function streamFromGridFS(fileId, req, res) {
         res.set({
             'Content-Type': contentType,
             'Content-Length': fileSize,
-            'Accept-Ranges': 'bytes'
+            'Accept-Ranges': 'bytes',
+            'Content-Disposition': disposition
         });
 
         const downloadStream = bucket.openDownloadStream(id);

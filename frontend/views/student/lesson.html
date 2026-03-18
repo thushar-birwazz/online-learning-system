@@ -101,7 +101,7 @@
                         No PDF files yet
                     </div>
                     <a class="pdf-download-btn" ng-repeat="pdf in course.pdfFiles" ng-href="{{pdf.url}}" target="_blank"
-                        download>
+                        download="{{pdf.name}}">
                         <i class="fas fa-download me-2"></i>{{pdf.name}}
                     </a>
                 </div>
